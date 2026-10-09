@@ -33,6 +33,12 @@ export class ForbiddenError extends ApiError{
   }
 }
 
+export class PaymentRequiredError extends ApiError{
+  constructor(message='Your wallet does not hold enough for that',details){
+    super(402,'INSUFFICIENT_FUNDS',message,details);
+  }
+}
+
 export class NotFoundError extends ApiError{
   constructor(message='That resource does not exist'){
     super(404,'NOT_FOUND',message);

@@ -9,6 +9,7 @@ const sessionSchema=new mongoose.Schema({
   endsAt:{type:Date,required:true},
   capacity:{type:Number,required:true,default:SESSION_CAPACITY,min:1},
   seatsTaken:{type:Number,required:true,default:0,min:0},
+  price:{type:Number,required:true,default:0,min:0},
   createdBy:{type:mongoose.Schema.Types.ObjectId,ref:'User',required:true}
 },{timestamps:true});
 
