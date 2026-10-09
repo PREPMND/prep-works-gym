@@ -18,7 +18,7 @@ function validateSession({date,startHour}){
 }
 
 export function FrontDesk(){
-  const [draft,setDraft]=useState({date:todayIso(),startHour:'7',capacity:'20'});
+  const [draft,setDraft]=useState({date:todayIso(),startHour:'7',capacity:'20',price:'0'});
   const [draftErrors,setDraftErrors]=useState({});
   const [creating,setCreating]=useState(false);
   const [createFeedback,setCreateFeedback]=useState(null);
@@ -84,7 +84,8 @@ export function FrontDesk(){
       const result=await api.createSession({
         date:draft.date,
         startHour:Number(draft.startHour),
-        capacity:Number(draft.capacity)
+        capacity:Number(draft.capacity),
+        price:Math.round(Number(draft.price||0)*100)
       });
       setCreateFeedback({
         tone:'success',
@@ -205,6 +206,18 @@ export function FrontDesk(){
               hint="The gym runs twenty to an hour."
               onChange={value=>setDraft(previous=>({...previous,capacity:value}))}
               error={draftErrors.capacity}
+              disabled={creating}
+            />
+
+            <Field
+              label="Price"
+              type="number"
+              min="0"
+              step="1"
+              value={draft.price}
+              hint="In rupees. Leave at 0 to keep the hour free."
+              onChange={value=>setDraft(previous=>({...previous,price:value}))}
+              error={draftErrors.price}
               disabled={creating}
             />
 

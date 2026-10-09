@@ -7,6 +7,7 @@ import {Register} from './pages/Register.jsx';
 import {Sessions} from './pages/Sessions.jsx';
 import {MyBookings} from './pages/MyBookings.jsx';
 import {FrontDesk} from './pages/FrontDesk.jsx';
+import {Wallet} from './pages/Wallet.jsx';
 
 function NotFound(){
   return (
@@ -29,6 +30,7 @@ export function App(){
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path={paths.sessions} element={<Sessions />} />
         <Route path={paths.myBookings} element={<MyBookings />} />
+        <Route path={paths.wallet} element={<ProtectedRoute role="member"><Wallet /></ProtectedRoute>} />
         <Route
           path={paths.frontDesk}
           element={<ProtectedRoute role="admin"><FrontDesk /></ProtectedRoute>}

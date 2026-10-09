@@ -16,5 +16,9 @@ export const api={
   joinWaitlist:sessionId=>request('/waitlist',{method:'POST',body:{sessionId}}),
   leaveWaitlist:sessionId=>request(`/waitlist/${sessionId}`,{method:'DELETE'}),
 
-  checkIn:code=>request('/check-ins',{method:'POST',body:{code}})
+  checkIn:code=>request('/check-ins',{method:'POST',body:{code}}),
+
+  wallet:signal=>request('/wallet',{signal}),
+  startTopUp:amount=>request('/wallet/top-ups',{method:'POST',body:{amount}}),
+  confirmTopUp:(topUpId,otp)=>request(`/wallet/top-ups/${topUpId}/confirm`,{method:'POST',body:{otp}})
 };

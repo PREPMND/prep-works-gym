@@ -3,5 +3,6 @@ export const paths={
   register:'/register',
   sessions:'/sessions',
   myBookings:'/my-bookings',
+  wallet:'/wallet',
   frontDesk:'/front-desk'
 };
