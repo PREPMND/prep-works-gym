@@ -13,9 +13,12 @@ export function useResource(loader,{deps=[],pollMs=0}={}){
   const activeRef=useRef(null);
   const mountedRef=useRef(true);
 
-  useEffect(()=>()=>{
-    mountedRef.current=false;
-    activeRef.current?.abort();
+  useEffect(()=>{
+    mountedRef.current=true;
+    return ()=>{
+      mountedRef.current=false;
+      activeRef.current?.abort();
+    };
   },[]);
 
   const run=useCallback(async(mode)=>{
