@@ -5,7 +5,7 @@ import {paths} from '../routes/paths.js';
 
 export function Layout(){
   const {user,isAdmin,logout}=useAuth();
-  const {theme,toggle}=useTheme();
+  const {theme,toggle,palette,setPalette,palettes}=useTheme();
   const navigate=useNavigate();
 
   const signOut=()=>{
@@ -30,6 +30,22 @@ export function Layout(){
           <div className="whoami">
             <span className="whoami__name">{user?.name}</span>
             <span className="whoami__role">{user?.role}</span>
+            <div className="swatches" role="group" aria-label="Colour theme">
+              {palettes.map(option=>(
+                <button
+                  key={option.id}
+                  type="button"
+                  className="swatch"
+                  style={{'--swatch':option.swatch}}
+                  onClick={()=>setPalette(option.id)}
+                  aria-pressed={palette===option.id}
+                  title={option.label}
+                >
+                  <span className="visually-hidden">{option.label}</span>
+                </button>
+              ))}
+            </div>
+
             <button
               type="button"
               className="themetoggle"

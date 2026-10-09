@@ -289,3 +289,20 @@
 .checkout__total{border-top:1px solid var(--rule-strong);margin-top:var(--gap-1);padding-top:var(--gap-2) !important;font-weight:700}
 
 .badge--open{color:var(--ink-soft)}
+
+.swatches{display:flex;gap:var(--gap-1);align-items:center}
+.swatch{
+  width:1.05rem;
+  height:1.05rem;
+  padding:0;
+  border:1px solid var(--rule-strong);
+  border-radius:50%;
+  background:var(--swatch);
+  cursor:pointer;
+}
+.swatch:hover{transform:scale(1.12)}
+.swatch[aria-pressed='true']{box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--ink)}
+
+@media (prefers-reduced-motion:no-preference){
+  .swatch{transition:transform 120ms ease-out}
+}
