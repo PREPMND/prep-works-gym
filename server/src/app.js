@@ -22,6 +22,7 @@ export function createApp(){
   app.use('/api/bookings',routers.bookings);
   app.use('/api/waitlist',routers.waitlist);
   app.use('/api/check-ins',routers.checkIns);
+  app.use('/api/wallet',routers.wallet);
 
   app.use(notFound);
   app.use(errorHandler);
