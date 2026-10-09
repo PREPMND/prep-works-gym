@@ -263,3 +263,17 @@
   padding:0 0.4em;
   white-space:nowrap;
 }
+
+.checkout{
+  border:1px solid var(--ink);
+  border-left-width:4px;
+  background:var(--paper-raised);
+  padding:var(--gap-3);
+  margin-bottom:var(--gap-4);
+}
+.checkout h3{margin:var(--gap-1) 0 var(--gap-3)}
+.checkout__lines{margin:0 0 var(--gap-3);max-width:22rem}
+.checkout__lines div{display:flex;justify-content:space-between;gap:var(--gap-3);padding:0.2rem 0}
+.checkout__lines dt{color:var(--ink-soft)}
+.checkout__lines dd{margin:0;font-family:var(--font-mono)}
+.checkout__total{border-top:1px solid var(--rule-strong);margin-top:var(--gap-1);padding-top:var(--gap-2) !important;font-weight:700}

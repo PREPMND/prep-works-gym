@@ -1,5 +1,7 @@
 import {useCallback,useState} from 'react';
+import {Link} from 'react-router-dom';
 import {api} from '../api/endpoints.js';
+import {paths} from '../routes/paths.js';
 import {useAuth} from '../auth/AuthContext.jsx';
 import {useResource} from '../hooks/useResource.js';
 import {Notice} from '../components/Notice.jsx';
@@ -26,6 +28,14 @@ export function Sessions(){
   const [onlyAvailable,setOnlyAvailable]=useState(false);
   const [pending,setPending]=useState({});
   const [feedback,setFeedback]=useState(null);
+  const [checkout,setCheckout]=useState(null);
+
+  const walletLoader=useCallback(
+    signal=>(isAdmin?Promise.resolve(null):api.wallet(signal)),
+    [isAdmin]
+  );
+  const wallet=useResource(walletLoader,{deps:[isAdmin]});
+  const balance=wallet.data?.balance??null;
 
   const loader=useCallback(
     signal=>api.listSessions({date:date||undefined,onlyAvailable:onlyAvailable?'true':undefined},signal),
@@ -63,7 +73,13 @@ export function Sessions(){
     try{
       if(kind==='book'){
         const result=await api.book(session.id);
-        setFeedback({tone:'success',title:'Seat held',body:`Your code for ${formatSlot(session)} is ${result.booking.code}.`});
+        setFeedback({
+          tone:'success',
+          title:'Seat held',
+          body:session.price>0
+            ?`${formatMoney(session.price)} taken from your wallet. Your code for ${formatSlot(session)} is ${result.booking.code}.`
+            :`Your code for ${formatSlot(session)} is ${result.booking.code}.`
+        });
       }
       if(kind==='cancel'){
         const result=await api.cancel(session.viewer.bookingId);
@@ -79,10 +95,16 @@ export function Sessions(){
         await api.leaveWaitlist(session.id);
         setFeedback({tone:'success',title:'Left the waitlist',body:'You will not be moved into that session.'});
       }
-      await reload();
+      setCheckout(null);
+      await Promise.all([reload(),isAdmin?Promise.resolve():wallet.reload()]);
     }catch(caught){
       setData(snapshot);
-      setFeedback({tone:'error',title:'That did not work',body:caught.message});
+      setFeedback({
+        tone:'error',
+        title:caught.status===402?'Not enough credit':'That did not work',
+        body:caught.message
+      });
+      if(caught.status!==402)setCheckout(null);
     }finally{
       setPending(previous=>{
         const next={...previous};
@@ -117,6 +139,51 @@ export function Sessions(){
           {staleError.message} The figures below may be out of date.
         </Notice>
       ):null}
+
+      {checkout?(()=>{
+        const short=balance!==null&&balance<checkout.price;
+        const busy=Boolean(pending[checkout.id]);
+        return (
+          <section className="checkout" aria-labelledby="checkout-heading" aria-live="polite">
+            <p className="eyebrow" id="checkout-heading">Confirm payment</p>
+            <h3>{formatSlot(checkout)} on {formatDay(checkout.date)}</h3>
+
+            <dl className="checkout__lines numeric">
+              <div>
+                <dt>Session</dt>
+                <dd>{formatMoney(checkout.price)}</dd>
+              </div>
+              <div>
+                <dt>Wallet balance</dt>
+                <dd>{balance===null?'—':formatMoney(balance)}</dd>
+              </div>
+              <div className="checkout__total">
+                <dt>Balance after</dt>
+                <dd>{balance===null?'—':formatMoney(Math.max(balance-checkout.price,0))}</dd>
+              </div>
+            </dl>
+
+            {short?(
+              <p className="field__error">
+                You are {formatMoney(checkout.price-balance)} short. Top up your wallet to book this hour.
+              </p>
+            ):null}
+
+            <div className="inline">
+              {short?(
+                <Link className="btn" to={paths.wallet}>Top up wallet</Link>
+              ):(
+                <button type="button" className="btn" disabled={busy} onClick={()=>runAction(checkout,'book')}>
+                  {busy?'Paying':`Pay ${formatMoney(checkout.price)} and book`}
+                </button>
+              )}
+              <button type="button" className="linkbutton" onClick={()=>setCheckout(null)} disabled={busy}>
+                Cancel
+              </button>
+            </div>
+          </section>
+        );
+      })():null}
 
       <section className="panel" aria-labelledby="timetable-heading">
         <div className="panel__head">
@@ -217,6 +284,15 @@ export function Sessions(){
                     ):session.isFull?(
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={()=>runAction(session,'waitlist')}>
                         {busy?'Joining':'Join waitlist'}
+                      </button>
+                    ):session.price>0?(
+                      <button
+                        type="button"
+                        className="btn"
+                        disabled={busy}
+                        onClick={()=>{setFeedback(null);setCheckout(session);}}
+                      >
+                        {busy?'Paying':`Book · ${formatMoney(session.price)}`}
                       </button>
                     ):(
                       <button type="button" className="btn" disabled={busy} onClick={()=>runAction(session,'book')}>
