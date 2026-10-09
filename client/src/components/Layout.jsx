@@ -1,9 +1,11 @@
 import {NavLink,Outlet,useNavigate} from 'react-router-dom';
 import {useAuth} from '../auth/AuthContext.jsx';
+import {useTheme} from '../hooks/useTheme.js';
 import {paths} from '../routes/paths.js';
 
 export function Layout(){
   const {user,isAdmin,logout}=useAuth();
+  const {theme,toggle}=useTheme();
   const navigate=useNavigate();
 
   const signOut=()=>{
@@ -21,12 +23,21 @@ export function Layout(){
           <nav className="masthead__nav" aria-label="Main">
             <NavLink to={paths.sessions} className="navlink">Sessions</NavLink>
             <NavLink to={paths.myBookings} className="navlink">My bookings</NavLink>
+            {isAdmin?null:<NavLink to={paths.wallet} className="navlink">Wallet</NavLink>}
             {isAdmin?<NavLink to={paths.frontDesk} className="navlink">Front desk</NavLink>:null}
           </nav>
 
           <div className="whoami">
             <span className="whoami__name">{user?.name}</span>
             <span className="whoami__role">{user?.role}</span>
+            <button
+              type="button"
+              className="themetoggle"
+              onClick={toggle}
+              aria-pressed={theme==='dark'}
+            >
+              {theme==='dark'?'Light':'Dark'}
+            </button>
             <button type="button" className="linkbutton" onClick={signOut}>Sign out</button>
           </div>
         </div>
