@@ -1,0 +1,37 @@
+:root{
+  --paper:#f4f2ec;
+  --paper-raised:#fbfaf6;
+  --paper-sunk:#eceade;
+  --ink:#191610;
+  --ink-soft:#57503f;
+  --ink-faint:#8d8573;
+  --rule:#dcd5c4;
+  --rule-strong:#bdb49f;
+  --accent:#9a3412;
+  --accent-wash:#f1e3da;
+  --positive:#2d6248;
+  --positive-wash:#e2ece4;
+  --caution:#7a5a12;
+  --caution-wash:#f1e9d4;
+
+  --font-display:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --font-ui:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+  --font-mono:'Space Mono','SFMono-Regular',Consolas,monospace;
+
+  --step--1:0.78rem;
+  --step-0:0.94rem;
+  --step-1:1.12rem;
+  --step-2:1.5rem;
+  --step-3:2.1rem;
+  --step-4:3rem;
+
+  --gap-1:0.35rem;
+  --gap-2:0.7rem;
+  --gap-3:1.1rem;
+  --gap-4:1.8rem;
+  --gap-5:2.8rem;
+  --gap-6:4.2rem;
+
+  --shell:66rem;
+  --focus:0 0 0 2px var(--paper),0 0 0 4px var(--ink);
+}
