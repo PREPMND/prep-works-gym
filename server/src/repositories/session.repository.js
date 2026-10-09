@@ -22,7 +22,7 @@ export class SessionRepository{
   async list({date,onlyAvailable,from}={}){
     const filter={};
     if(date)filter.date=date;
-    if(from)filter.startsAt={$gte:from};
+    if(from)filter.endsAt={$gte:from};
     if(onlyAvailable)filter.$expr={$lt:['$seatsTaken','$capacity']};
     return this.model.find(filter).sort({startsAt:1});
   }
