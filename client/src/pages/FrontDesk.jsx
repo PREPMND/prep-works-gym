@@ -47,6 +47,31 @@ export function FrontDesk(){
     setSelectedId((running||sessions[0]).id);
   },[sessions,selectedId]);
 
+  const onToday=draft.date===todayIso();
+  const hourNow=new Date().getUTCHours();
+
+  const takenKey=sessions
+    .filter(session=>session.date===draft.date)
+    .map(session=>session.startHour)
+    .sort((a,b)=>a-b)
+    .join(',');
+
+  const hourState=useCallback(hour=>{
+    const taken=takenKey?takenKey.split(',').map(Number):[];
+    if(taken.includes(hour))return 'taken';
+    if(onToday&&hour<=hourNow)return 'past';
+    return 'open';
+  },[takenKey,onToday,hourNow]);
+
+  const firstOpenHour=HOURS.find(hour=>hourState(hour)==='open');
+
+  useEffect(()=>{
+    if(firstOpenHour===undefined)return;
+    if(hourState(Number(draft.startHour))!=='open'){
+      setDraft(previous=>({...previous,startHour:String(firstOpenHour)}));
+    }
+  },[draft.startHour,firstOpenHour,hourState]);
+
   const createSession=async event=>{
     event.preventDefault();
     const found=validateSession(draft);
@@ -150,11 +175,22 @@ export function FrontDesk(){
                 aria-describedby={draftErrors.startHour?'start-hour-error':undefined}
                 disabled={creating}
               >
-                {HOURS.map(hour=>(
-                  <option key={hour} value={String(hour)}>{formatHour(hour)}</option>
-                ))}
+                {HOURS.map(hour=>{
+                  const state=hourState(hour);
+                  return (
+                    <option key={hour} value={String(hour)} disabled={state!=='open'}>
+                      {formatHour(hour)}
+                      {state==='taken'?' — already scheduled':''}
+                      {state==='past'?' — gone':''}
+                    </option>
+                  );
+                })}
               </select>
-              <span className="field__hint">Sessions run for exactly one hour.</span>
+              <span className="field__hint">
+                {firstOpenHour===undefined
+                  ?'Every hour on this date is taken. Pick another day.'
+                  :'Sessions run for exactly one hour. Hours already on the timetable cannot be reused.'}
+              </span>
               {draftErrors.startHour?(
                 <span className="field__error" id="start-hour-error">{draftErrors.startHour}</span>
               ):null}
