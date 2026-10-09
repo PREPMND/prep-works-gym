@@ -1,16 +1,22 @@
-import {ConflictError,ForbiddenError,NotFoundError} from '../../errors/ApiError.js';
+import {ConflictError,ForbiddenError,NotFoundError,PaymentRequiredError} from '../../errors/ApiError.js';
 import {BOOKING_STATUS} from '../../models/Booking.js';
 import {ROLES} from '../../models/User.js';
+import {WALLET_ENTRY_KIND} from '../../models/WalletEntry.js';
 import {generateCheckInCode} from '../../utils/code.js';
 import {hasStarted} from '../../utils/time.js';
 import {presentBooking,presentSession} from '../sessions/sessions.presenter.js';
 
 export class BookingsService{
-  constructor({sessionRepository,bookingRepository,waitlistRepository,unitOfWork}){
+  constructor({sessionRepository,bookingRepository,waitlistRepository,walletRepository,unitOfWork}){
     this.sessions=sessionRepository;
     this.bookings=bookingRepository;
     this.waitlist=waitlistRepository;
+    this.wallet=walletRepository;
     this.unitOfWork=unitOfWork;
+  }
+
+  describe(session){
+    return `${session.date} at ${String(session.startHour).padStart(2,'0')}:00`;
   }
 
   async create({sessionId},member){
@@ -33,6 +39,17 @@ export class BookingsService{
           code:await this.allocateCode(txn),
           source:'direct'
         },{txn});
+
+        if(session.price>0){
+          const paid=await this.wallet.charge({
+            memberId:member.id,
+            amount:session.price,
+            note:`Session on ${this.describe(session)}`,
+            sessionId:session._id,
+            bookingId:booking._id
+          },{txn});
+          if(!paid)throw new PaymentRequiredError('Your wallet does not hold enough for that session. Top it up and try again.');
+        }
 
         return {
           booking:presentBooking(booking,reserved),
@@ -60,6 +77,16 @@ export class BookingsService{
 
       await this.bookings.cancel(booking._id,{txn});
 
+      if(session.price>0){
+        await this.wallet.refund({
+          memberId:booking.member,
+          amount:session.price,
+          note:`Refund for ${this.describe(session)}`,
+          sessionId:session._id,
+          bookingId:booking._id
+        },{txn});
+      }
+
       const promoted=await this.promoteNext(session,{txn});
       if(!promoted)await this.sessions.releaseSeat(session._id,{txn});
 
@@ -78,12 +105,31 @@ export class BookingsService{
       const already=await this.bookings.findConfirmed({sessionId:session._id,memberId:head.member},{txn});
       if(already)continue;
 
+      let balanceAfter=null;
+      if(session.price>0){
+        const payer=await this.wallet.debit(head.member,session.price,{txn});
+        if(!payer)continue;
+        balanceAfter=payer.walletBalance;
+      }
+
       const booking=await this.bookings.create({
         session:session._id,
         member:head.member,
         code:await this.allocateCode(txn),
         source:'waitlist'
       },{txn});
+
+      if(session.price>0){
+        await this.wallet.record({
+          memberId:head.member,
+          kind:WALLET_ENTRY_KIND.charge,
+          amount:session.price,
+          balanceAfter,
+          note:`Session on ${this.describe(session)}, taken from the waitlist`,
+          sessionId:session._id,
+          bookingId:booking._id
+        },{txn});
+      }
 
       return {bookingId:String(booking._id),memberId:String(head.member)};
     }

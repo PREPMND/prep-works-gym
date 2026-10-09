@@ -9,7 +9,7 @@ export class SessionsService{
     this.waitlist=waitlistRepository;
   }
 
-  async create({date,startHour,capacity},adminId){
+  async create({date,startHour,capacity,price},adminId){
     const window=buildSessionWindow(date,startHour);
     if(!window)throw new ValidationError([{field:'body.date',message:'That date and hour do not form a real time'}]);
 
@@ -24,6 +24,7 @@ export class SessionsService{
       date,
       startHour,
       capacity,
+      price,
       seatsTaken:0,
       startsAt:window.startsAt,
       endsAt:window.endsAt,

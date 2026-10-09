@@ -9,6 +9,7 @@ export function presentSession(session,viewerState){
     startsAt:session.startsAt,
     endsAt:session.endsAt,
     capacity:session.capacity,
+    price:session.price||0,
     seatsTaken:session.seatsTaken,
     seatsRemaining:Math.max(session.capacity-session.seatsTaken,0),
     isFull:session.seatsTaken>=session.capacity,

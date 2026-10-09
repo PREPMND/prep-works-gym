@@ -6,7 +6,8 @@ export const createSessionSchema={
   body:z.object({
     date:isoDate,
     startHour:z.coerce.number().int().min(0,'Hour must be between 0 and 23').max(23,'Hour must be between 0 and 23'),
-    capacity:z.coerce.number().int().min(1).max(200).default(SESSION_CAPACITY)
+    capacity:z.coerce.number().int().min(1).max(200).default(SESSION_CAPACITY),
+    price:z.coerce.number().int('Enter a whole number of rupees').min(0).max(1000000).default(0)
   }).strict()
 };
 
