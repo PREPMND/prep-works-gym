@@ -118,7 +118,7 @@
 .btn--block{width:100%}
 
 .sessions{list-style:none;margin:0;padding:0}
-.sessions{--cols:9.5rem minmax(8rem,1fr) 8rem 12rem;max-width:46rem}
+.sessions{--cols:9.5rem minmax(8rem,1fr) 8rem 12rem}
 
 .sessions__row{
   display:grid;
