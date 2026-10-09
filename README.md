@@ -50,6 +50,46 @@ docker exec gym-mongo mongosh --port 27019 --quiet --eval 'rs.initiate({_id:"rs0
 
 Then `MONGODB_URI=mongodb://localhost:27019/gym-slot-booking?replicaSet=rs0`.
 
+## Deploying
+
+Nothing in the repo holds configuration; both services read it from the environment.
+
+**Database — MongoDB Atlas (M0).** An M0 cluster is a replica set, which is what the
+waitlist promotion needs. Under Network Access allow `0.0.0.0/0`, because Render's outbound
+addresses are not fixed on the free plan.
+
+**API — Render**, root directory `server`, build `npm install`, start `npm start`, health
+check path `/api/health`. Render supplies `PORT` itself. Set:
+
+| Variable | Value |
+| --- | --- |
+| `MONGODB_URI` | the Atlas connection string |
+| `JWT_SECRET` | a long random string, not the one from `.env.example` |
+| `CLIENT_ORIGIN` | the deployed frontend origin, e.g. `https://your-app.vercel.app` |
+| `NODE_ENV` | `production` |
+
+**Frontend — Vercel**, root directory `client`, framework Vite, output `dist`. Set
+`VITE_API_URL` to `https://your-api.onrender.com/api`. Vite inlines this at build time, so
+changing it needs a redeploy, not just a restart.
+
+`vercel.json` rewrites every path to `index.html`. Without it a client-side route such as
+`/my-bookings` returns 404 when it is opened directly or refreshed.
+
+**Seeding the deployed database.** Run it from your machine against Atlas:
+
+```bash
+cd server
+MONGODB_URI="<atlas-uri>" JWT_SECRET="<any-32-chars>" npm run seed
+```
+
+The seed empties the six collections first, so only run it against a database you are happy
+to lose.
+
+Two things a reviewer should know, and the live links should mention: the Render free plan
+sleeps an idle service, so the first request after a pause can take up to a minute; and
+`CLIENT_ORIGIN` accepts a comma-separated list, which is how you let a Vercel preview URL
+reach the API alongside production.
+
 ## Test accounts
 
 `npm run seed` wipes the four collections and rebuilds them.
