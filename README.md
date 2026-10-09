@@ -12,7 +12,7 @@ the notebook: members book and cancel online, staff add sessions and mark who tu
 1. Node, Express and MongoDB with Mongoose; React, Vite and React Router on the front end.
 2. Layers run routes → validation → controller → service → repository, wired in one container.
 3. Services hold the rules, repositories hold the queries, controllers only shape the response.
-4. Four collections: users, sessions, bookings, waitlist entries, related by ObjectId.
+4. Six collections: users, sessions, bookings, waitlist entries, wallet entries, top-ups.
 5. A session carries `capacity` and `seatsTaken`, so a seat is claimed by one atomic update.
 6. Booking filters on `seatsTaken < capacity` inside `findOneAndUpdate`, so the last seat has one winner.
 7. A partial unique index on `(session, member)` over confirmed bookings is the backstop.
@@ -62,6 +62,10 @@ Then `MONGODB_URI=mongodb://localhost:27019/gym-slot-booking?replicaSet=rs0`.
 
 It also creates `member01@gym.test` … `member22@gym.test` on `Member@1234` to fill sessions.
 
+Maya opens with ₹1,200 in her wallet and Dev with ₹150. One seeded session costs ₹250, so
+Maya can book it and Dev gets a 402 — both payment paths are demonstrable without typing
+anything in.
+
 The seed leaves six sessions across four days: one running in the current hour with a
 redeemable code, one full with two people waiting, one part-filled, and two empty. The code
 for the live session is printed when the seed finishes — redeem it on the front desk page to
@@ -90,6 +94,9 @@ All routes sit under `/api`. Everything except register, login and health needs
 | POST | `/waitlist` | member | Joins a full session's waitlist |
 | DELETE | `/waitlist/:sessionId` | member | Leaves it |
 | POST | `/check-ins` | admin | Redeems a code and names the member |
+| GET | `/wallet` | member | Balance and statement |
+| POST | `/wallet/top-ups` | member | Starts a top-up, issues a one-time code |
+| POST | `/wallet/top-ups/:id/confirm` | member | Confirms the code and credits the wallet |
 
 Errors always look the same:
 
@@ -98,7 +105,8 @@ Errors always look the same:
 ```
 
 `422` adds `details`, an array of `{field, message}`. `400` malformed request, `401`
-unauthenticated, `403` forbidden, `404` missing, `409` conflict.
+unauthenticated, `402` not enough wallet credit, `403` forbidden, `404` missing, `409`
+conflict.
 
 ## How the awkward parts work
 
@@ -121,6 +129,42 @@ with the ambiguous letters removed, so one code reveals nothing about the next. 
 resolves only while its own session is in progress, only once, and only for a confirmed
 booking — the lookup filters on status, so cancelling makes a code stop existing.
 
+## Payments, which the brief did not ask for
+
+The brief has no pricing in it, so **every session defaults to `price: 0` and the charge path
+is skipped entirely when the price is zero.** The booking flow the brief describes is
+unchanged. What follows is an extra, and it is a simulation — no payment provider, no keys,
+no real money.
+
+A member holds a wallet balance. Topping up issues a six-digit one-time code, which the API
+returns in the response outside production (and logs to the server console) so the flow can
+be demonstrated without an SMS gateway. Confirming the code credits the wallet.
+
+Booking a priced session debits the wallet with the same atomic guard used for seats:
+
+```js
+findOneAndUpdate({_id:memberId, walletBalance:{$gte:amount}}, {$inc:{walletBalance:-amount}})
+```
+
+`null` back means the balance moved under us, and the service answers `402`. Because the
+debit shares the booking's transaction, a refused payment rolls the seat back too — no seat
+is ever held without being paid for. Cancelling refunds inside the cancel transaction.
+
+Every balance change writes a `WalletEntry` carrying the amount and the balance after it, so
+the statement reconstructs the balance from the ledger. The test suite replays all entries
+and asserts the running total matches.
+
+Three details worth knowing:
+
+- **The attempt counter is deliberately outside the transaction.** A wrong code throws, and a
+  throw aborts a transaction — which would roll back the very counter that limits guessing.
+  Rate limiting has to survive the failure it is counting, so only the money movement is
+  transactional.
+- Codes expire after five minutes, die after three wrong guesses, and cannot be replayed.
+- **A waitlisted member who cannot afford the promotion is skipped**, and the seat passes to
+  the next person. They lose their place. A kinder system would hold the seat and notify
+  them; that needs a notification channel and an expiry job.
+
 ## Assumptions
 
 - **All times are UTC.** A session is identified by a date and an integer start hour, and the
@@ -139,9 +183,12 @@ booking — the lookup filters on status, so cancelling makes a code stop existi
   would be the next step, not the first.
 - **Tokens live in `localStorage`.** Simple and adequate here; httpOnly cookies would be the
   production answer.
+- **Money is stored in paise**, as integers. Floating point has no business holding currency.
+- **The wallet is a simulation**, and the UI says so on the page itself.
 
 ## Not done
 
-No automated test suite is committed. The API was verified end to end with a throwaway script
-covering 44 cases — every status code above, the booking race, waitlist promotion, ownership
-checks and all four check-in rejections. Those belong in `supertest` files in a real project.
+No automated test suite is committed. The API was verified end to end with throwaway scripts
+covering 70 cases — every status code above, the booking race, waitlist promotion, ownership
+checks, all four check-in rejections, and the wallet's OTP, refund and ledger rules. Those
+belong in `supertest` files in a real project.
