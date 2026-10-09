@@ -3,9 +3,10 @@ import {api} from '../api/endpoints.js';
 import {useAuth} from '../auth/AuthContext.jsx';
 import {useResource} from '../hooks/useResource.js';
 import {Notice} from '../components/Notice.jsx';
-import {SeatMeter} from '../components/SeatMeter.jsx';
+import {SeatDots} from '../components/SeatDots.jsx';
 import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
 import {formatDay,formatSlot,pluralise} from '../utils/format.js';
+import {formatMoney} from '../utils/money.js';
 
 const POLL_MS=10000;
 
@@ -173,6 +174,9 @@ export function Sessions(){
                   <div>
                     <p className="slot__hour">{formatSlot(session)}</p>
                     <p className="slot__day">{formatDay(session.date)}</p>
+                    <p className="price" data-free={session.price?'false':'true'}>
+                      {session.price?formatMoney(session.price):'Free'}
+                    </p>
                   </div>
 
                   <div>
@@ -191,7 +195,7 @@ export function Sessions(){
                     </p>
                   </div>
 
-                  <SeatMeter seatsRemaining={session.seatsRemaining} capacity={session.capacity} />
+                  <SeatDots seatsRemaining={session.seatsRemaining} capacity={session.capacity} mine={held} />
 
                   <div className="sessions__action inline">
                     {held?<span className="badge badge--held">Held</span>:null}
