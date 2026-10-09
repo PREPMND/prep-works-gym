@@ -3,7 +3,7 @@ import {api} from '../api/endpoints.js';
 import {useResource} from '../hooks/useResource.js';
 import {Field} from '../components/Field.jsx';
 import {Notice} from '../components/Notice.jsx';
-import {SeatMeter} from '../components/SeatMeter.jsx';
+import {SeatDots} from '../components/SeatDots.jsx';
 import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
 import {formatDay,formatHour,formatSlot,formatStamp,todayIso} from '../utils/format.js';
 
@@ -288,7 +288,7 @@ export function FrontDesk(){
                 ))}
               </select>
             </div>
-            {selected?<SeatMeter seatsRemaining={selected.seatsRemaining} capacity={selected.capacity} />:null}
+            {selected?<SeatDots seatsRemaining={selected.seatsRemaining} capacity={selected.capacity} />:null}
           </div>
         </div>
 

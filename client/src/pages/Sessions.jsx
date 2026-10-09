@@ -264,15 +264,16 @@ export function Sessions(){
 
                   <SeatDots seatsRemaining={session.seatsRemaining} capacity={session.capacity} mine={held} />
 
-                  <div className="sessions__action inline">
-                    {held?<span className="badge badge--held">Held</span>:null}
-                    {queued?<span className="badge badge--queued">Queued</span>:null}
-                    {!held&&!queued&&session.isFull?<span className="badge badge--full">Full</span>:null}
+                  <div className="sessions__action">
+                    {held?<span className="badge badge--held">Held</span>
+                      :queued?<span className="badge badge--queued">Queued</span>
+                        :session.isInProgress?<span className="badge badge--gone">Live</span>
+                          :session.hasStarted?<span className="badge badge--gone">Closed</span>
+                            :session.isFull?<span className="badge badge--full">Full</span>
+                              :<span className="badge badge--open">Open</span>}
 
-                    {isAdmin?(
-                      <span className="badge badge--gone">Staff view</span>
-                    ):session.hasStarted?(
-                      <span className="badge badge--gone">{session.isInProgress?'In progress':'Closed'}</span>
+                    {isAdmin||session.hasStarted?(
+                      <span className="sessions__nil">&mdash;</span>
                     ):held?(
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={()=>runAction(session,'cancel')}>
                         {busy?'Cancelling':'Cancel'}

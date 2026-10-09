@@ -34,6 +34,14 @@
 
   --shell:66rem;
   --focus:0 0 0 2px var(--paper),0 0 0 4px var(--ink);
+  --radius:3px;
+  --control:2.3rem;
+
+  --btn-bg:#191610;
+  --btn-fg:#fbfaf6;
+  --btn-bg-hover:#9a3412;
+
+  color-scheme:light;
 }
 
 :root[data-theme='dark']{
@@ -51,4 +59,10 @@
   --positive-wash:#17291f;
   --caution:#d8ad4e;
   --caution-wash:#2c2415;
+
+  --btn-bg:#e8893f;
+  --btn-fg:#17140f;
+  --btn-bg-hover:#f5b06a;
+
+  color-scheme:dark;
 }
