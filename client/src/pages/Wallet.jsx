@@ -3,7 +3,8 @@ import {api} from '../api/endpoints.js';
 import {useResource} from '../hooks/useResource.js';
 import {Field} from '../components/Field.jsx';
 import {Notice} from '../components/Notice.jsx';
-import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
+import {EmptyState,ErrorState} from '../components/ResourceState.jsx';
+import {LoadingBlock,Spinner} from '../components/Loading.jsx';
 import {formatMoney,toPaise} from '../utils/money.js';
 import {formatHour,formatStamp} from '../utils/format.js';
 
@@ -106,7 +107,7 @@ export function Wallet(){
 
       {feedback?<Notice tone={feedback.tone} title={feedback.title}>{feedback.body}</Notice>:null}
 
-      {loading?<LoadingState label="Loading your wallet" />:null}
+      {loading?<LoadingBlock label="Loading your wallet" rows={3} />:null}
       {!loading&&error?<ErrorState error={error} onRetry={retry} busy={refreshing} />:null}
 
       {!loading&&!error?(
@@ -155,7 +156,7 @@ export function Wallet(){
 
                     <div className="inline">
                       <button type="submit" className="btn" disabled={confirming}>
-                        {confirming?'Confirming':'Confirm top-up'}
+                        {confirming?<><Spinner />Confirming</>:'Confirm top-up'}
                       </button>
                       <button type="button" className="linkbutton" onClick={abandon} disabled={confirming}>
                         Cancel
@@ -191,7 +192,7 @@ export function Wallet(){
                     </div>
 
                     <button type="submit" className="btn" disabled={starting}>
-                      {starting?'Sending code':'Send one-time code'}
+                      {starting?<><Spinner />Sending code</>:'Send one-time code'}
                     </button>
                   </form>
                 )}

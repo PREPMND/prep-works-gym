@@ -31,7 +31,7 @@ a:hover{color:var(--accent)}
 
 button,input,select{font:inherit;color:inherit}
 
-:focus-visible{outline:none;box-shadow:var(--focus);border-radius:1px}
+:focus-visible{outline:none;box-shadow:var(--focus);border-radius:var(--radius-sm)}
 
 .eyebrow{
   font-size:var(--step--1);

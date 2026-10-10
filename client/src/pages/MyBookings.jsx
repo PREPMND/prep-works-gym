@@ -2,7 +2,8 @@ import {useCallback,useState} from 'react';
 import {api} from '../api/endpoints.js';
 import {useResource} from '../hooks/useResource.js';
 import {Notice} from '../components/Notice.jsx';
-import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
+import {EmptyState,ErrorState} from '../components/ResourceState.jsx';
+import {LoadingBlock,Spinner} from '../components/Loading.jsx';
 import {formatDay,formatSlot,formatStamp} from '../utils/format.js';
 
 const POLL_MS=15000;
@@ -63,7 +64,7 @@ export function MyBookings(){
       {feedback?<Notice tone={feedback.tone} title={feedback.title}>{feedback.body}</Notice>:null}
       {staleError?<Notice tone="error" title="Live updates paused">{staleError.message}</Notice>:null}
 
-      {loading?<LoadingState label="Loading your bookings" />:null}
+      {loading?<LoadingBlock label="Loading your bookings" rows={3} />:null}
       {!loading&&error?<ErrorState error={error} onRetry={retry} busy={refreshing} />:null}
 
       {!loading&&!error?(
@@ -101,7 +102,7 @@ export function MyBookings(){
                           disabled={pending===booking.id}
                           onClick={()=>cancel(booking)}
                         >
-                          {pending===booking.id?'Cancelling':'Cancel'}
+                          {pending===booking.id?<><Spinner />Cancelling</>:'Cancel'}
                         </button>
                       </td>
                     </tr>
@@ -148,7 +149,7 @@ export function MyBookings(){
                           disabled={pending===entry.id}
                           onClick={()=>leave(entry)}
                         >
-                          {pending===entry.id?'Leaving':'Leave'}
+                          {pending===entry.id?<><Spinner />Leaving</>:'Leave'}
                         </button>
                       </td>
                     </tr>

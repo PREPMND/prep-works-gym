@@ -4,7 +4,8 @@ import {useResource} from '../hooks/useResource.js';
 import {Field} from '../components/Field.jsx';
 import {Notice} from '../components/Notice.jsx';
 import {SeatDots} from '../components/SeatDots.jsx';
-import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
+import {EmptyState,ErrorState} from '../components/ResourceState.jsx';
+import {LoadingBlock,Spinner} from '../components/Loading.jsx';
 import {formatDay,formatHour,formatSlot,formatStamp,todayIso} from '../utils/format.js';
 
 const POLL_MS=10000;
@@ -222,7 +223,7 @@ export function FrontDesk(){
             />
 
             <button type="submit" className="btn" disabled={creating}>
-              {creating?'Adding':'Add to timetable'}
+              {creating?<><Spinner />Adding</>:'Add to timetable'}
             </button>
           </form>
         </section>
@@ -245,7 +246,7 @@ export function FrontDesk(){
               disabled={redeeming}
             />
             <button type="submit" className="btn" disabled={redeeming||!code.trim()}>
-              {redeeming?'Checking':'Mark present'}
+              {redeeming?<><Spinner />Checking</>:'Mark present'}
             </button>
           </form>
 
@@ -292,13 +293,13 @@ export function FrontDesk(){
           </div>
         </div>
 
-        {list.loading?<LoadingState label="Loading sessions" />:null}
+        {list.loading?<LoadingBlock label="Loading sessions" rows={2} />:null}
         {!list.loading&&list.error?<ErrorState error={list.error} onRetry={list.retry} busy={list.refreshing} />:null}
         {!list.loading&&!list.error&&!sessions.length?(
           <EmptyState title="No sessions yet">Add one with the form above and it appears here.</EmptyState>
         ):null}
 
-        {sessions.length&&detail.loading?<LoadingState label="Loading the register" />:null}
+        {sessions.length&&detail.loading?<LoadingBlock label="Loading the register" rows={4} />:null}
         {sessions.length&&!detail.loading&&detail.error?(
           <ErrorState error={detail.error} onRetry={detail.retry} busy={detail.refreshing} />
         ):null}

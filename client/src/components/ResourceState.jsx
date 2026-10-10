@@ -1,8 +1,9 @@
+import {Spinner} from './Loading.jsx';
+
 export function LoadingState({label='Loading'}){
   return (
     <div className="state" role="status" aria-live="polite">
-      <p className="eyebrow">{label}</p>
-      <p className="state__body">Fetching the latest from the gym.</p>
+      <p className="loadingblock__label"><Spinner label={label} /><span>{label}</span></p>
     </div>
   );
 }

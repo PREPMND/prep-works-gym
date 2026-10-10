@@ -6,7 +6,8 @@ import {useAuth} from '../auth/AuthContext.jsx';
 import {useResource} from '../hooks/useResource.js';
 import {Notice} from '../components/Notice.jsx';
 import {SeatDots} from '../components/SeatDots.jsx';
-import {EmptyState,ErrorState,LoadingState} from '../components/ResourceState.jsx';
+import {EmptyState,ErrorState} from '../components/ResourceState.jsx';
+import {LoadingBlock,SkeletonSessions,Spinner} from '../components/Loading.jsx';
 import {formatDay,formatSlot,pluralise} from '../utils/format.js';
 import {formatMoney} from '../utils/money.js';
 
@@ -174,7 +175,7 @@ export function Sessions(){
                 <Link className="btn" to={paths.wallet}>Top up wallet</Link>
               ):(
                 <button type="button" className="btn" disabled={busy} onClick={()=>runAction(checkout,'book')}>
-                  {busy?'Paying':`Pay ${formatMoney(checkout.price)} and book`}
+                  {busy?<><Spinner />Paying</>:`Pay ${formatMoney(checkout.price)} and book`}
                 </button>
               )}
               <button type="button" className="linkbutton" onClick={()=>setCheckout(null)} disabled={busy}>
@@ -217,7 +218,11 @@ export function Sessions(){
           </div>
         </div>
 
-        {loading?<LoadingState label="Loading the timetable" />:null}
+        {loading?(
+          <LoadingBlock label="Loading the timetable">
+            <SkeletonSessions rows={4} />
+          </LoadingBlock>
+        ):null}
 
         {!loading&&error?<ErrorState error={error} onRetry={retry} busy={refreshing} />:null}
 
@@ -276,15 +281,15 @@ export function Sessions(){
                       <span className="sessions__nil">&mdash;</span>
                     ):held?(
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={()=>runAction(session,'cancel')}>
-                        {busy?'Cancelling':'Cancel'}
+                        {busy?<><Spinner />Cancelling</>:'Cancel'}
                       </button>
                     ):queued?(
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={()=>runAction(session,'leave')}>
-                        {busy?'Leaving':'Leave queue'}
+                        {busy?<><Spinner />Leaving</>:'Leave queue'}
                       </button>
                     ):session.isFull?(
                       <button type="button" className="btn btn--ghost" disabled={busy} onClick={()=>runAction(session,'waitlist')}>
-                        {busy?'Joining':'Join waitlist'}
+                        {busy?<><Spinner />Joining</>:'Join waitlist'}
                       </button>
                     ):session.price>0?(
                       <button
@@ -297,7 +302,7 @@ export function Sessions(){
                       </button>
                     ):(
                       <button type="button" className="btn" disabled={busy} onClick={()=>runAction(session,'book')}>
-                        {busy?'Booking':'Book'}
+                        {busy?<><Spinner />Booking</>:'Book'}
                       </button>
                     )}
                   </div>
