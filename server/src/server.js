@@ -6,7 +6,8 @@ async function start(){
   await connectDatabase();
   const app=createApp();
   const server=app.listen(env.PORT,()=>{
-    console.log(`API listening on http://localhost:${env.PORT} in ${env.NODE_ENV} mode`);
+    console.log(`API listening on port ${env.PORT} in ${env.NODE_ENV} mode`);
+    console.log(`Browser origins allowed: ${env.CLIENT_ORIGIN.split(',').map(o=>o.trim()).join(', ')}`);
   });
 
   const shutdown=async signal=>{
