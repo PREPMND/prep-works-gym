@@ -11,7 +11,8 @@ const schema=z.object({
   JWT_EXPIRES_IN:z.string().default('7d'),
   CLIENT_ORIGIN:z.string().default('http://localhost:5173'),
   SEED_ADMIN_PASSWORD:z.string().min(8).default('Admin@1234'),
-  SEED_MEMBER_PASSWORD:z.string().min(8).default('Member@1234')
+  SEED_MEMBER_PASSWORD:z.string().min(8).default('Member@1234'),
+  DEMO_SHOW_OTP:z.enum(['true','false']).default('false').transform(v=>v==='true')
 });
 
 const parsed=schema.safeParse(process.env);

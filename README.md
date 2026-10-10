@@ -67,6 +67,7 @@ check path `/api/health`. Render supplies `PORT` itself. Set:
 | `JWT_SECRET` | a long random string, not the one from `.env.example` |
 | `CLIENT_ORIGIN` | the deployed frontend origin, e.g. `https://your-app.vercel.app` |
 | `NODE_ENV` | `production` |
+| `DEMO_SHOW_OTP` | `true`, so the wallet top-up can be completed without an SMS gateway |
 
 **Frontend — Vercel**, root directory `client`, framework Vite, output `dist`. Set
 `VITE_API_URL` to `https://your-api.onrender.com/api`. Vite inlines this at build time, so
@@ -201,6 +202,9 @@ Three details worth knowing:
   Rate limiting has to survive the failure it is counting, so only the money movement is
   transactional.
 - Codes expire after five minutes, die after three wrong guesses, and cannot be replayed.
+- The code is returned to the caller only when `DEMO_SHOW_OTP` is set, or outside production.
+  It is an explicit flag rather than a `NODE_ENV` check, so revealing it is always a
+  deliberate choice; a real build would send it over SMS and never return it.
 - **A waitlisted member who cannot afford the promotion is skipped**, and the seat passes to
   the next person. They lose their place. A kinder system would hold the seat and notify
   them; that needs a notification channel and an expiry job.

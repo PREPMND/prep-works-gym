@@ -132,7 +132,13 @@ export function Wallet(){
                         <p className="stub__otp">
                           Demo code: <span className="code">{demoOtp}</span>
                         </p>
-                      ):null}
+                      ):(
+                        <p className="stub__otp slot__note">
+                          A real deployment would text this code to you. This one is written to
+                          the server log instead, and is only shown here when the operator sets
+                          DEMO_SHOW_OTP.
+                        </p>
+                      )}
                       <p className="slot__note">The code expires five minutes after it is issued.</p>
                     </div>
 

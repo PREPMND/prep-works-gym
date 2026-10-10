@@ -2,7 +2,7 @@ import {ConflictError,NotFoundError,ValidationError} from '../../errors/ApiError
 import {MAX_OTP_ATTEMPTS,TOP_UP_STATUS} from '../../models/TopUp.js';
 import {WALLET_ENTRY_KIND} from '../../models/WalletEntry.js';
 import {generateOtp,generateReference,hashOtp,otpMatches,OTP_TTL_MS} from '../../utils/otp.js';
-import {isProduction} from '../../config/env.js';
+import {env,isProduction} from '../../config/env.js';
 
 export class WalletService{
   constructor({userRepository,walletRepository,topUpRepository,unitOfWork}){
@@ -49,7 +49,8 @@ export class WalletService{
       expiresAt:new Date(Date.now()+OTP_TTL_MS)
     });
 
-    if(!isProduction)console.log(`Wallet top-up ${reference} for ${member.email}: one-time code ${otp}`);
+    const reveal=env.DEMO_SHOW_OTP||!isProduction;
+    if(reveal)console.log(`Wallet top-up ${reference} for ${member.email}: one-time code ${otp}`);
 
     return {
       topUp:{
@@ -59,7 +60,7 @@ export class WalletService{
         expiresAt:topUp.expiresAt,
         attemptsLeft:MAX_OTP_ATTEMPTS
       },
-      demoOtp:isProduction?undefined:otp
+      demoOtp:reveal?otp:undefined
     };
   }
 
