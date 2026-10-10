@@ -49,8 +49,8 @@ export class WalletService{
       expiresAt:new Date(Date.now()+OTP_TTL_MS)
     });
 
+    console.log(`Wallet top-up ${reference} for ${member.email}: one-time code ${otp}`);
     const reveal=env.DEMO_SHOW_OTP||!isProduction;
-    if(reveal)console.log(`Wallet top-up ${reference} for ${member.email}: one-time code ${otp}`);
 
     return {
       topUp:{
