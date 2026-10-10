@@ -5,6 +5,9 @@
   "type": "module",
   "description": "Booking API for one-hour gym sessions",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=18.18"
+  },
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
